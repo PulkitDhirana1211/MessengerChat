@@ -228,7 +228,26 @@ class RegisterViewController: UIViewController {
                     return
                 }
                 
-                DatabaseManager.shared.insertUser(with: ChatAppUser(firstName: firstName, lastName: lastName, emailAddress: email))
+                let chatUser = ChatAppUser(firstName: firstName, lastName: lastName, emailAddress: email)
+                DatabaseManager.shared.insertUser(with: chatUser) { success in
+                    if success {
+                       // upload image
+                        guard let image = strongSelf.imageView.image, let data = image.pngData() else {
+                            return
+                        }
+                        
+                        let filename = chatUser.profilePictureFileName
+                        StorageManager.shared.uploadProfilePicture(with: data, fileName: filename) { result in
+                            switch result {
+                            case .success(let downloadUrl):
+                                UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
+                                print(downloadUrl)
+                            case .failure(let error):
+                                print("Storage Manager error: \(error)")
+                            }
+                        }
+                    }
+                }
                 
                 strongSelf.navigationController?.dismiss(animated: true, completion: nil)
                 
@@ -258,9 +277,13 @@ class RegisterViewController: UIViewController {
 extension RegisterViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if textField == emailField {
+        if textField == firstNameField {
+            lastNameField.becomeFirstResponder()
+        } else if textField == lastNameField {
+            emailField.becomeFirstResponder()
+        } else if textField == emailField {
             passwordField.becomeFirstResponder()
-        } else if textField == passwordField {
+        } else {
             registerButtonTapped()
         }
         return true
