@@ -18,10 +18,9 @@ final class StorageManager {
     /images/user-email-com_profile_picture.png
     */
     
-    // Uploads picture to firebase and returns completion with url string to download
-    
     public typealias uploadPictureCompletion = (Result<String, Error>) -> Void
     
+    // Upload picture to firebase storage and returns completion with url string to download
     public func uploadProfilePicture(with data: Data, fileName: String, completion: @escaping uploadPictureCompletion) {
         storage.child("images/\(fileName)").putData(data, metadata: nil) { [weak self] metadata, error in
             
@@ -36,6 +35,34 @@ final class StorageManager {
             }
             
             strongSelf.storage.child("images/\(fileName)").downloadURL { url, error in
+                guard let url = url else {
+                    print("Failed to get download url")
+                    completion(.failure(StorageErrors.failedToGetDownloadUrl))
+                    return
+                }
+                
+                let urlString = url.absoluteString
+                print("download url returned: \(urlString)")
+                completion(.success(urlString))
+            }
+        }
+    }
+    
+    // Upload image that will be sent in conversation message
+    public func uploadMessagePhoto(with data: Data, fileName: String, completion: @escaping uploadPictureCompletion) {
+        storage.child("message_images/\(fileName)").putData(data, metadata: nil) { [weak self] metadata, error in
+            
+            guard let strongSelf = self else {
+                return
+            }
+            
+            guard error == nil else {
+                print("Failed to upload data to firebase for pictures ")
+                completion(.failure(StorageErrors.failedToUpload))
+                return
+            }
+            
+            strongSelf.storage.child("message_images/\(fileName)").downloadURL { url, error in
                 guard let url = url else {
                     print("Failed to get download url")
                     completion(.failure(StorageErrors.failedToGetDownloadUrl))

@@ -59,7 +59,6 @@ class ConversationTableViewCell: UITableViewCell {
                                      width: contentView.width - 20 - userImageView.width,
                                      height: (contentView.height-20)/2)
 
-
     }
     
     public func configure(with model: Conversation) {
