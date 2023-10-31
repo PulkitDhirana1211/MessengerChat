@@ -8,9 +8,12 @@
 import Foundation
 import FirebaseStorage
 
+/// Allows you to get,fetch and upload files to firebase storage
 final class StorageManager {
     
-    static let shared = StorageManager()
+    public static let shared = StorageManager()
+    
+    private init() {}
     
     private let storage = Storage.storage().reference()
     
@@ -20,7 +23,7 @@ final class StorageManager {
     
     public typealias uploadPictureCompletion = (Result<String, Error>) -> Void
     
-    // Upload picture to firebase storage and returns completion with url string to download
+    /// Upload picture to firebase storage and returns completion with url string to download
     public func uploadProfilePicture(with data: Data, fileName: String, completion: @escaping uploadPictureCompletion) {
         storage.child("images/\(fileName)").putData(data, metadata: nil) { [weak self] metadata, error in
             
@@ -48,7 +51,7 @@ final class StorageManager {
         }
     }
     
-    // Upload image that will be sent in conversation message
+    /// Upload image that will be sent in conversation message
     public func uploadMessagePhoto(with data: Data, fileName: String, completion: @escaping uploadPictureCompletion) {
         storage.child("message_images/\(fileName)").putData(data, metadata: nil) { [weak self] metadata, error in
             
@@ -76,7 +79,7 @@ final class StorageManager {
         }
     }
     
-    // Upload video that will be sent in conversation message
+    /// Upload video that will be sent in conversation message
     public func uploadMessageVideo(with fileUrl: URL, fileName: String, completion: @escaping uploadPictureCompletion) {
         storage.child("message_videos/\(fileName)").putFile(from: fileUrl, metadata: nil) { [weak self] metadata, error in
             
